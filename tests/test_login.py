@@ -35,13 +35,8 @@ def test_valid_login(page, excel_sheet):
         assert expectedmsg_read_from_excel in res, f"Expected message: '{expectedmsg_read_from_excel}', but got: '{res}'"
         write_data(file_path=excel_sheet_path, sheet_name=sheet_name, row=2, column=6, data=res)
     except Exception as e:
+        assert expectedmsg_read_from_excel in res, f"Expected message: '{expectedmsg_read_from_excel}', but got: '{res}'"
         write_data(file_path=excel_sheet_path, sheet_name=sheet_name, row=2, column=6, data=res)
-        allure.attach(
-            page.screenshot(full_page=True),
-            name="Login_Failure_Screenshot",
-            attachment_type=allure.attachment_type.PNG
-        )
-        raise e
 
 @allure.title("Test the Login Screen InValid Email/Password")
 @allure.testcase("TC-002")
@@ -93,12 +88,15 @@ def test_invalid_login_without_email(page, excel_sheet):
     expectedmsg_read_from_excel = read_data(excel_sheet, sheet_name, *expected_msg_cell)
     print("Email Read","=", email_read_from_excel)
     print("Password Read","=", password_read_from_excel)
+    
+    email_empty_value = str(email_read_from_excel or "").strip()
+    print("Email Empty Value", email_empty_value)
     login_form = LoginClass(page)
     logger.info("Navigating to login page")
     with allure.step("Verify and Load the Site URL"):
         login_form.login_page_load()
     with allure.step("Enter credentials and submit login form"):
-        res = login_form.login_screen_validate(email_read_from_excel, password_read_from_excel)
+        res = login_form.login_screen_validate(email_empty_value, password_read_from_excel)
     time.sleep(3)
     try:
         assert expectedmsg_read_from_excel in res, f"Expected message: '{expectedmsg_read_from_excel}', but got: '{res}'"
@@ -130,12 +128,13 @@ def test_invalid_login_without_password(page, excel_sheet):
     expectedmsg_read_from_excel = read_data(excel_sheet, sheet_name, *expected_msg_cell)
     print("Email Read","=", email_read_from_excel)
     print("Password Read","=", password_read_from_excel)
+    password_empty_value = str(password_read_from_excel or "").strip()
     login_form = LoginClass(page)
     logger.info("Navigating to login page")
     with allure.step("Verify and Load the Site URL"):
         login_form.login_page_load()
     with allure.step("Enter credentials and submit login form"):
-        res = login_form.login_screen_validate(email_read_from_excel, password_read_from_excel)
+        res = login_form.login_screen_validate(email_read_from_excel, password_empty_value)
     time.sleep(3)
     try:
         assert expectedmsg_read_from_excel in res, f"Expected message: '{expectedmsg_read_from_excel}', but got: '{res}'"
@@ -167,12 +166,13 @@ def test_invalid_login_with_useremail_as_number(page, excel_sheet):
     expectedmsg_read_from_excel = read_data(excel_sheet, sheet_name, *expected_msg_cell)
     print("Email Read","=", email_read_from_excel)
     print("Password Read","=", password_read_from_excel)
+    email_empty_value = int(email_read_from_excel or "")
     login_form = LoginClass(page)
     logger.info("Navigating to login page")
     with allure.step("Verify and Load the Site URL"):
         login_form.login_page_load()
     with allure.step("Enter credentials and submit login form"):
-        res = login_form.login_screen_validate(email_read_from_excel, password_read_from_excel)
+        res = login_form.login_screen_validate(email_empty_value, password_read_from_excel)
     time.sleep(3)
     try:
         assert expectedmsg_read_from_excel in res, f"Expected message: '{expectedmsg_read_from_excel}', but got: '{res}'"
@@ -204,12 +204,16 @@ def test_invalid_login_without_useremail_password(page, excel_sheet):
     expectedmsg_read_from_excel = read_data(excel_sheet, sheet_name, *expected_msg_cell)
     print("Email Read","=", email_read_from_excel)
     print("Password Read","=", password_read_from_excel)
+
+    email_empty_value = str(email_read_from_excel or "").strip()
+    password_empty_value = str(password_read_from_excel or "").strip()
+
     login_form = LoginClass(page)
     logger.info("Navigating to login page")
     with allure.step("Verify and Load the Site URL"):
         login_form.login_page_load()
     with allure.step("Enter credentials and submit login form"):
-        res = login_form.login_screen_validate(email_read_from_excel, password_read_from_excel)
+        res = login_form.login_screen_validate(email_empty_value, password_empty_value)
     time.sleep(3)
     try:
         assert expectedmsg_read_from_excel in res, f"Expected message: '{expectedmsg_read_from_excel}', but got: '{res}'"
