@@ -44,7 +44,8 @@ class LoginClass:
     def login_screen_validate(self, user_email, password, expected_result="Success"):
         try:
             logger.info(f"Attempting login with Email: {user_email} | Password: {password}")
-
+            user_email = str(user_email or "").strip()
+            password = str(password or "").strip()
             # Fill credentials
             email_field = self.page.locator(self.email_field_xpath)
             password_field = self.page.locator(self.password_field_xpath)
@@ -55,52 +56,54 @@ class LoginClass:
             email_field.fill(user_email)
             password_field.fill(password)
 
-            # Click login button
-            # login_btn = self.page.locator(self.login_btn_xpath)
-            # login_btn.click()
-
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            screenshot_path = f"D:\\Playwright\\reports\\screenshots\\login_form_fill{timestamp}.png"
+            screenshot_path = f"D:\\Playwright\\reports\\screenshots\\login_form_{timestamp}.png"
             self.page.screenshot(path=screenshot_path)
             self.page.wait_for_timeout(2000)
-            
-            error_button_check = self.page.locator(self.login_fail_text)
 
             email_valid = email_field.evaluate("el => el.validity.valid")
+            print("Email Valid Check", email_valid)
             password_valid = password_field.evaluate("el => el.validity.valid")
+            print("Password Valid Check", password_valid)
 
             # email field validation
             if not email_valid:
                 validation_msg = email_field.evaluate("el => el.validationMessage")
+                print("Email Valid Required Check", validation_msg)
                 logger.info(f"Email validation message: {validation_msg}")
                 return validation_msg
             
             # password field validation 
             if not password_valid:
                 validation_msg = password_field.evaluate("el => el.validationMessage")
+                print("Password Valid Required Check", validation_msg)
                 logger.info(f"Password validation message: {validation_msg}")
                 return validation_msg
             
             login_btn = self.page.locator(self.login_btn_xpath)
-            with self.page.expect_navigation(wait_until="load", timeout=20000):
-                login_btn.click()
+            login_btn.click()
+            logger.info("Clicked login button.")
 
-            # login button fail validation
-            if error_button_check.is_visible():
+            error_button_check = self.page.locator(self.login_fail_text)
+            apps_popup = self.page.locator(self.apps_popup_xpath)
+
+            self.page.wait_for_timeout(2000)
+
+            if error_button_check.is_visible(timeout=5000):
+                error_button_check.is_visible()
                 print("Error Button")
                 actual_text = error_button_check.text_content().strip()
                 print("Login Fail Actual Text",actual_text)
                 logger.info(f"Login Fail Actual Text {actual_text}")
                 return actual_text
             
-            apps_popup = self.page.locator(self.apps_popup_xpath)
-
             if apps_popup.is_visible():
                 print("Apps Popup")
                 apps_popup.click()
             self.page.wait_for_timeout(3000)
             page_title = self.page.title()
             print("Page Title", page_title)
+            self.page.reload()
 
             if "Home" in page_title:
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -108,7 +111,6 @@ class LoginClass:
                 self.page.screenshot(path=screenshot_path)
                 self.page.wait_for_timeout(3000)
                 return "Login Successful"
-
         except Exception as e:
             traceback.print_exc()
             self.page.wait_for_timeout(3000)
